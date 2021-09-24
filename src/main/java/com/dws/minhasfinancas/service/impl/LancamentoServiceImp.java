@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class LancamentoServiceImp implements LancamentoService {
@@ -26,6 +28,7 @@ public class LancamentoServiceImp implements LancamentoService {
     public Lancamento salvar(Lancamento lancamento) {
         validar(lancamento);
         lancamento.setStatus(StatusLancamento.PENDENTE);
+        lancamento.setDataCadastro(LocalDate.now());
         return repository.save(lancamento);
     }
 
@@ -80,5 +83,10 @@ public class LancamentoServiceImp implements LancamentoService {
             throw new RegraNegocioException("Informe um valor válido");
 
         if (lancamento.getTipo() == null) throw new RegraNegocioException("Informe um tipo de lançamento");
+    }
+
+    @Override
+    public Optional<Lancamento> buscarPorId(Long id) {
+        return repository.findById(id);
     }
 }
