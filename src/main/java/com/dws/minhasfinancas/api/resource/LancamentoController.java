@@ -1,5 +1,6 @@
 package com.dws.minhasfinancas.api.resource;
 
+import com.dws.minhasfinancas.api.dto.AtualizaStatusDTO;
 import com.dws.minhasfinancas.api.dto.LancamentoDTO;
 import com.dws.minhasfinancas.exception.RegraNegocioException;
 import com.dws.minhasfinancas.model.entity.Lancamento;
@@ -73,6 +74,27 @@ public class LancamentoController {
         } catch (RegraNegocioException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PutMapping("{id}/atualiza-status")
+    public ResponseEntity atualizarStatus(@PathVariable("id") Long id, @RequestBody AtualizaStatusDTO dto) {
+            ResponseEntity responseEntity = service.buscarPorId(id).map(entity -> {
+                StatusLancamento statusLancamento = StatusLancamento.valueOf(dto.getStatus());
+                if (statusLancamento == null) {
+                    return new ResponseEntity("Status informado não existe", HttpStatus.BAD_REQUEST);
+                }
+
+                try {
+                    entity.setStatus(statusLancamento);
+                    service.atualizar(entity);
+                    return new ResponseEntity(entity, HttpStatus.OK);
+                } catch (Exception e) {
+                    return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+                }
+            }).orElseGet(() ->
+                    new ResponseEntity("Não existe nenhum lançamento com ID informado", HttpStatus.BAD_REQUEST));
+
+            return responseEntity;
     }
 
     @DeleteMapping("{id}")
