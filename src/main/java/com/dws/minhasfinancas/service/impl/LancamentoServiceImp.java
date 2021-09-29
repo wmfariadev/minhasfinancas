@@ -3,6 +3,7 @@ package com.dws.minhasfinancas.service.impl;
 import com.dws.minhasfinancas.exception.RegraNegocioException;
 import com.dws.minhasfinancas.model.entity.Lancamento;
 import com.dws.minhasfinancas.model.enums.StatusLancamento;
+import com.dws.minhasfinancas.model.enums.TipoLancamento;
 import com.dws.minhasfinancas.model.repository.LancamentoRepository;
 import com.dws.minhasfinancas.service.LancamentoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,5 +89,17 @@ public class LancamentoServiceImp implements LancamentoService {
     @Override
     public Optional<Lancamento> buscarPorId(Long id) {
         return repository.findById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BigDecimal obterSaldoPorUsuario(Long id) {
+        BigDecimal receitas = repository.obterSaldoPorUsuario(id, TipoLancamento.RECEITA);
+        BigDecimal despesas = repository.obterSaldoPorUsuario(id, TipoLancamento.DESPESA);
+
+        if (receitas == null) receitas = BigDecimal.ZERO;
+        if (despesas == null) despesas = BigDecimal.ZERO;
+
+        return receitas.subtract(despesas);
     }
 }
