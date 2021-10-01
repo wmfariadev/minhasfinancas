@@ -41,18 +41,26 @@ public class LancamentoController {
             @RequestParam(value = "descricao", required = false) String descricao,
             @RequestParam(value = "mes", required = false) Integer mes,
             @RequestParam(value = "ano", required = false) Integer ano,
+            @RequestParam(value = "tipo", required = false, defaultValue = "") String tipo,
             @RequestParam("usuario") Long idUsuario) {
 
         Optional<Usuario> usuario = usuarioService.buscarPorId(idUsuario);
 
         if (!usuario.isPresent()) return new ResponseEntity("Usuário não encontrado", HttpStatus.BAD_REQUEST);
 
-        Lancamento filtro = Lancamento.builder()
-                .mes(mes)
-                .ano(ano)
-                .descricao(descricao)
-                .usuario(usuario.get())
-                .build();
+        Lancamento filtro = new Lancamento();
+        filtro.setMes(mes);
+        filtro.setAno(ano);
+        filtro.setDescricao(descricao);
+        filtro.setUsuario(usuario.get());
+
+        if (!tipo.equals("")) {
+            try {
+                filtro.setTipo(TipoLancamento.valueOf(tipo));
+            } catch (IllegalArgumentException e) {
+                return new ResponseEntity("Não existe o Tipo de lançamento informado", HttpStatus.BAD_REQUEST);
+            }
+        }
 
         return new ResponseEntity(service.buscar(filtro), HttpStatus.OK);
     }
